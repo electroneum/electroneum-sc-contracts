@@ -21,6 +21,8 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 internal totalCrosschainAmount;
     uint internal totalCrosschainTxs;
 
+    string internal lastCrosschainLegacyTxHash;
+
     // Event definitions
     event CrossChainTransfer(string indexed _from, address indexed _to, uint256 _value);
     event DepositReceived(address indexed _from, uint256 _value);
@@ -42,7 +44,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         __UUPSUpgradeable_init();
     }
 
-    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash) public onlyOwner {
+    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner {
         // Address verification
         require(_address == address(_address), "Invalid addr");
         require(_address != address(0), "Invalid addr(0)");
@@ -78,6 +80,10 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         // Mark tx_hash computed by storing tx amount into txMap[hash]
         txMap[_txHash] = _amount;
 
+        if(_isOracle) {
+            lastCrosschainLegacyTxHash = _txHash;
+        }
+
         _address.transfer(_amount);
         assert(_address.balance == addressOldBalance + _amount);
         assert(address(this).balance == contractOldBalance - _amount);
@@ -101,7 +107,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         return addressTxMap[_address];
     }
 
-    // Get aount for a particular transaction
+    // Get amount for a particular transaction
     function getTxAmount(string memory txHash) public view returns (uint256) {
         return txMap[txHash];
     }
@@ -114,5 +120,9 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     // Get total amount of ETN sent to this bridge contract
     function getTotalCrosschainAmount() public view returns (uint256) {
         return totalCrosschainAmount;
+    }
+
+    function getLastCrosschainLegacyTxHash() public view returns (string memory) {
+        return lastCrosschainLegacyTxHash;
     }
 }
