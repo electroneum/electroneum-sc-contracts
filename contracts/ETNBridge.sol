@@ -1,14 +1,15 @@
 // contracts/ETNBridge.sol
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 // Import from the OpenZeppelin Contracts library
-import "../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 // Make ETNBridge inherit from the Ownable contract
-contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
+contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     // Croschain mappings
     mapping(string => address) internal crosschainLegacyETNtoAddress;
@@ -42,26 +43,27 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     function initialize() public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
+        __ReentrancyGuard_init();
     }
 
-    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner {
+    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant {
         // Address verification
-        require(_address == address(_address), "Invalid addr");
-        require(_address != address(0), "Invalid addr(0)");
+        require(_address == address(_address), "Invalid address format");
+        require(_address != address(0), "Invalid address");
         bytes memory tempLegacyETNBytes = bytes(_legacyETNAddress);
-        require(tempLegacyETNBytes.length == 98, "Invalid legacy_etn_addr");
+        require(tempLegacyETNBytes.length == 98, "Invalid legacy ETN address");
         // Amount verification
         require(_amount > 0, "Invalid amount");
-        require(address(this).balance >= _amount, "Not enough ETN in the Bridge SC");
+        require(address(this).balance >= _amount, "Insufficient ETN balance in the bridge contract");
         //Tx hash verification
         bytes memory tempTXHashBytes = bytes(_txHash);
-        require(tempTXHashBytes.length == 64, "Invalid tx hash");
+        require(tempTXHashBytes.length == 64, "Invalid transaction hash");
         require(txMap[_txHash] == 0, "Duplicate crosschain transaction");
 
         // Transfer ETN from contract to EOA
         uint256 addressOldBalance = _address.balance;
         uint256 contractOldBalance = address(this).balance;
-        
+
         // Compute total amount transacted
         totalCrosschainAmount += _amount;
 
@@ -85,8 +87,8 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         }
 
         _address.transfer(_amount);
-        assert(_address.balance == addressOldBalance + _amount);
-        assert(address(this).balance == contractOldBalance - _amount);
+        require(_address.balance == addressOldBalance + _amount, "Invalid ETN transfer: recipient balance not updated");
+        require(address(this).balance == contractOldBalance - _amount, "Invalid ETN transfer: sender balance not updated");
 
         // Log event
         emit CrossChainTransfer(_legacyETNAddress, _address, _amount);
