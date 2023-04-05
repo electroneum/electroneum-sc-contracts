@@ -7,9 +7,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 // Make ETNBridge inherit from the Ownable contract
-contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
 
     // Croschain mappings
     mapping(string => address) internal crosschainLegacyETNtoAddress;
@@ -40,13 +41,22 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     ///@dev required by the OZ UUPS module
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
+    function pause() public whenNotPaused onlyOwner {
+        PausableUpgradeable._pause();
+    }
+
+    function unpause() public whenPaused onlyOwner {
+        PausableUpgradeable._unpause();
+    }
+
     function initialize() public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
+        __Pausable_init();
     }
 
-    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant {
+    function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant whenNotPaused {
         // Address verification
         require(_address == address(_address), "Invalid address format");
         require(_address != address(0), "Invalid address");
