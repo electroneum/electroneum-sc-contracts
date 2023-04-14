@@ -26,7 +26,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     string internal lastCrosschainLegacyTxHash;
 
     // Event definitions
-    event CrossChainTransfer(string indexed _from, address indexed _to, uint256 _value);
+    event CrossChainTransfer(string indexed _fromIndexed, string _from, address indexed _to, uint256 _value);
     event DepositReceived(address indexed _from, uint256 _value);
 
     // fallback() and receive() definition. This allows ETN to be sent to this contract address.
@@ -101,7 +101,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         require(address(this).balance == contractOldBalance - _amount, "Invalid ETN transfer: sender balance not updated");
 
         // Log event
-        emit CrossChainTransfer(_legacyETNAddress, _address, _amount);
+        emit CrossChainTransfer(_legacyETNAddress, _legacyETNAddress, _address, _amount);
     }
 
     // Get legacy ETN address
