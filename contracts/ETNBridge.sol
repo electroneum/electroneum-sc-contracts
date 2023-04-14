@@ -70,21 +70,31 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         require(tempTXHashBytes.length == 64, "Invalid transaction hash");
         require(txMap[_txHash] == 0, "Duplicate crosschain transaction");
 
-        // Transfer ETN from contract to EOA
+        // Store EOA and Contract old balance
         uint256 addressOldBalance = _address.balance;
         uint256 contractOldBalance = address(this).balance;
+
+        // Check the LegacyAddress <-> Address map
+        if(crosschainLegacyETNtoAddress[_legacyETNAddress] != address(0)) {
+            require(crosschainLegacyETNtoAddress[_legacyETNAddress] == _address, "This legacy ETN address is already mapped to a different address");
+        } else {
+            // Store a map of legacy etn address <-> address
+            crosschainLegacyETNtoAddress[_legacyETNAddress] = _address;
+        }
+
+        bytes32 legacyAddressKeccak256 = keccak256(abi.encodePacked(crosschainAddressToLegacyETN[_address]));
+        if(legacyAddressKeccak256 != keccak256(abi.encodePacked(""))) {
+            require(legacyAddressKeccak256 == keccak256(abi.encodePacked(_legacyETNAddress)), "This address is already mapped to a different legacy ETN address");
+        } else {
+            // Store a map of address <-> legacy etn address
+            crosschainAddressToLegacyETN[_address] = _legacyETNAddress;
+        }
 
         // Compute total amount transacted
         totalCrosschainAmount += _amount;
 
         // Count crosschain tx
         totalCrosschainTxs += 1;
-
-        // Store a map of legacy etn address <-> address
-        if(crosschainLegacyETNtoAddress[_legacyETNAddress] == address(0)) {
-            crosschainLegacyETNtoAddress[_legacyETNAddress] = _address;
-            crosschainAddressToLegacyETN[_address] = _legacyETNAddress;
-        }
 
         // Push tx hash into address -> tx_hash[] map
         addressTxMap[_address].push(_txHash);
@@ -96,6 +106,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
             lastCrosschainLegacyTxHash = _txHash;
         }
 
+        // Transfer ETN from contract to EOA
         _address.transfer(_amount);
         require(_address.balance == addressOldBalance + _amount, "Invalid ETN transfer: recipient balance not updated");
         require(address(this).balance == contractOldBalance - _amount, "Invalid ETN transfer: sender balance not updated");
