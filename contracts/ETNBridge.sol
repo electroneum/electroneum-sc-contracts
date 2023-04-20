@@ -12,9 +12,14 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 // Make ETNBridge inherit from the Ownable contract
 contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
 
+    struct LegacyETNAddress {
+        bytes32 keccak;
+        string addr;
+    }
+
     // Croschain mappings
     mapping(string => address) internal crosschainLegacyETNtoAddress;
-    mapping(address => string[]) internal crosschainAddressToLegacyETN;
+    mapping(address => LegacyETNAddress[]) internal crosschainAddressToLegacyETN;
     mapping(address => uint256) internal crosschainBalance;
     mapping(address => string[]) internal addressTxMap;
     mapping(string => uint256) internal txMap;
@@ -83,21 +88,27 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         }
 
         // Check the Address <-> LegacyAddress map, an Address can be mapped to multiple legacy addresses
+        bytes32 legacyAddressKeccak256 = keccak256(abi.encodePacked(_legacyETNAddress));
         uint arrayLength = crosschainAddressToLegacyETN[_address].length;
         if(arrayLength == 0) {
-            crosschainAddressToLegacyETN[_address].push(_legacyETNAddress);
+            LegacyETNAddress memory addrObj;
+            addrObj.keccak = legacyAddressKeccak256;
+            addrObj.addr = _legacyETNAddress;
+            crosschainAddressToLegacyETN[_address].push(addrObj);
         } else {
-            bytes32 legacyAddressKeccak256 = keccak256(abi.encodePacked(_legacyETNAddress));
             bool found = false;
             for(uint i = 0; i < arrayLength; i++) {
-                if(keccak256(abi.encodePacked(crosschainAddressToLegacyETN[_address][i])) == legacyAddressKeccak256) {
+                if(crosschainAddressToLegacyETN[_address][i].keccak == legacyAddressKeccak256) {
                     found = true;
                     break;
                 }
             }
 
             if(!found) {
-                crosschainAddressToLegacyETN[_address].push(_legacyETNAddress);
+                LegacyETNAddress memory addrObj;
+                addrObj.keccak = legacyAddressKeccak256;
+                addrObj.addr = _legacyETNAddress;
+                crosschainAddressToLegacyETN[_address].push(addrObj);
             }
         }
 
@@ -127,12 +138,12 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     }
 
     // Get legacy ETN address
-    function getLegacyETNAddress(address _address) public view returns (string[] memory) {
+    function getLegacyETNAddress(address _address) public view returns (LegacyETNAddress[] memory) {
         return crosschainAddressToLegacyETN[_address];
     }
 
     // Get new address from legacy etn address
-    function getAddressFromLegacy(string memory _legacyETNAddress) public view returns (address) {
+    function getAddressFromLegacy(string calldata _legacyETNAddress) public view returns (address) {
         return crosschainLegacyETNtoAddress[_legacyETNAddress];
     }
 
@@ -142,7 +153,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     }
 
     // Get amount for a particular transaction
-    function getTxAmount(string memory txHash) public view returns (uint256) {
+    function getTxAmount(string calldata txHash) public view returns (uint256) {
         return txMap[txHash];
     }
 

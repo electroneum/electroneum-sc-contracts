@@ -112,7 +112,7 @@ contract("ETNBridge", function (accounts) {
         const getLegacyETNAddressResult = await contract.getLegacyETNAddress(testData.address)
         assert.equal(getLegacyETNAddressResult.length, obj.expectedGetLegacyETNAddress.length)
         for(let i = 0; i < obj.expectedGetLegacyETNAddress.length; i++) {
-            assert.equal(getLegacyETNAddressResult[i], obj.expectedGetLegacyETNAddress[i], 'wrong legacy address from getLegacyETNAddress()')
+            assert.equal(getLegacyETNAddressResult[i].addr, obj.expectedGetLegacyETNAddress[i], 'wrong legacy address from getLegacyETNAddress()')
         }
 
         const userTxHistory = await contract.getTxHistory(testData.address)
