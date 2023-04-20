@@ -65,30 +65,42 @@ contract("ETNBridge", function (accounts) {
             amount: web3.utils.toWei("1", "ether"),
             txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7007"
         },
-        {   // SC Address mapped to a different legacy address
-            address: "0x0000000000000000000000000000000000000020",
+        {   // SC Address mapped to a different legacy address (1)
+            address: "0x0000000000000000000000000000000000000070",
             legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0005",
             amount: web3.utils.toWei("1", "ether"),
             txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7008"
         },
-        {   // Valid inputs, multiple
-            address: "0x0000000000000000000000000000000000000020",
-            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0002",
+        {   // SC Address mapped to a different legacy address (2)
+            address: "0x0000000000000000000000000000000000000070",
+            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0015",
             amount: web3.utils.toWei("1", "ether"),
             txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7009"
         },
-        {   // Valid inputs, multiple
-            address: "0x0000000000000000000000000000000000000020",
-            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0002",
+        {   // SC Address mapped to a different legacy address (3)
+            address: "0x0000000000000000000000000000000000000070",
+            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0025",
             amount: web3.utils.toWei("1", "ether"),
             txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7010"
+        },
+        {   // Valid inputs, multiple
+            address: "0x0000000000000000000000000000000000000080",
+            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0006",
+            amount: web3.utils.toWei("1", "ether"),
+            txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7011"
+        },
+        {   // Valid inputs, multiple
+            address: "0x0000000000000000000000000000000000000080",
+            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0006",
+            amount: web3.utils.toWei("1", "ether"),
+            txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7012"
         }
         ,
         {   // Valid inputs, multiple
-            address: "0x0000000000000000000000000000000000000020",
-            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0002",
+            address: "0x0000000000000000000000000000000000000080",
+            legacyAddress: "etnkPPMb6BN24rzhF2LadK3RMn596R87dBidbV2m1UjpNniTMBQaFcD9cZFwfTvc6hN899kAjg6979oB1HXVFwRu4eCCKs0006",
             amount: web3.utils.toWei("1", "ether"),
-            txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7011"
+            txHash: "37af53586d6e40c2f70840e1d5949031b47456821aab87ae2e6f0e06c4fa7013"
         }
     ]
 
@@ -96,11 +108,16 @@ contract("ETNBridge", function (accounts) {
         assert.equal(await web3.eth.getBalance(testData.address), obj.expectedEOABalance, "wrong user balance")
         assert.equal(await web3.eth.getBalance(contract.address), obj.expectedContractBalance, "wrong contract balance")
         assert.equal(await contract.getAddressFromLegacy(testData.legacyAddress), obj.expectedGetAddressFromLegacy, 'wrong address from getAddressFromLegacy()')
-        assert.equal(await contract.getLegacyETNAddress(testData.address), obj.expectedGetLegacyETNAddress, 'wrong legacy address from getLegacyETNAddress()')
+
+        const getLegacyETNAddressResult = await contract.getLegacyETNAddress(testData.address)
+        assert.equal(getLegacyETNAddressResult.length, obj.expectedGetLegacyETNAddress.length)
+        for(let i = 0; i < obj.expectedGetLegacyETNAddress.length; i++) {
+            assert.equal(getLegacyETNAddressResult[i], obj.expectedGetLegacyETNAddress[i], 'wrong legacy address from getLegacyETNAddress()')
+        }
 
         const userTxHistory = await contract.getTxHistory(testData.address)
         assert.equal(userTxHistory.length, obj.expectedTXHistoryLength, 'wrong length in getTxHistory()')
-        for(let i = 0; i < obj.txHistoryLength; i++) {
+        for(let i = 0; i < obj.expectedTXHistoryLength; i++) {
             assert.equal(userTxHistory[i], obj.expectedTXHistoryHashList[i], 'wrong tx hash in getTxHistory()')
         }
 
@@ -131,7 +148,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -182,7 +199,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
             expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
             expectedGetAddressFromLegacy: currentTestData.address,
-            expectedGetLegacyETNAddress: currentTestData.legacyAddress,
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
             expectedTXHistoryLength: 1,
             expectedTXHistoryHashList: [currentTestData.txHash],
             expectedGetTxAmount: currentTestData.amount,
@@ -216,7 +233,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
             expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
             expectedGetAddressFromLegacy: currentTestData.address,
-            expectedGetLegacyETNAddress: currentTestData.legacyAddress,
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
             expectedTXHistoryLength: 1,
             expectedTXHistoryHashList: [currentTestData.txHash],
             expectedGetTxAmount: currentTestData.amount,
@@ -242,7 +259,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -268,7 +285,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -294,7 +311,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -320,7 +337,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -346,7 +363,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -372,7 +389,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: testData[0].amount,
@@ -398,7 +415,7 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: oldUserBalance,
             expectedContractBalance: oldContractBalance,
             expectedGetAddressFromLegacy: testData[1].address,
-            expectedGetLegacyETNAddress: '',
+            expectedGetLegacyETNAddress: [],
             expectedTXHistoryLength: 0,
             expectedTXHistoryHashList: [],
             expectedGetTxAmount: 0,
@@ -408,7 +425,7 @@ contract("ETNBridge", function (accounts) {
         })
     })
 
-    it("crosschainTransfer: sc address mapped to a different legacy address", async function () {
+    it("crosschainTransfer: sc address mapped to a different legacy address (1)", async function () {
         const contract = await ETNBridge.deployed()
 
         const currentTestData = testData[9]
@@ -418,23 +435,31 @@ contract("ETNBridge", function (accounts) {
         const oldTotalTxCount = await contract.getTotalTxCount()
         const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
 
-        await truffleAssert.reverts(contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true), "This address is already mapped to a different legacy ETN address")
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
+
+        // Assert CrossChainTransfer event was emitted
+        truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
+            assert.equal(ev._from, currentTestData.legacyAddress, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._to, currentTestData.address, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._value, currentTestData.amount, "CrossChainTransfer Event: wrong amount")
+            return true
+        })
 
         await assertCrosschainTransferResult(contract, currentTestData, {
-            expectedEOABalance: oldUserBalance,
-            expectedContractBalance: oldContractBalance,
-            expectedGetAddressFromLegacy: '0x0000000000000000000000000000000000000000',
-            expectedGetLegacyETNAddress: testData[1].legacyAddress,
+            expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
+            expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
+            expectedGetAddressFromLegacy: currentTestData.address,
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
             expectedTXHistoryLength: 1,
-            expectedTXHistoryHashList: [testData[1].txHash],
-            expectedGetTxAmount: 0,
-            expectedTotalTxCount: parseInt(oldTotalTxCount),
-            expectedTotalCrosschainAmount: oldTotalCrosschainAmount,
-            expectedLastCrosschainLegacyTxHash: testData[0].txHash
+            expectedTXHistoryHashList: [currentTestData.txHash],
+            expectedGetTxAmount: currentTestData.amount,
+            expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
+            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(currentTestData.amount)),
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
         })
     })
 
-    it("crosschainTransfer: valid inputs, same address, different tx hashes (1)", async function () {
+    it("crosschainTransfer: sc address mapped to a different legacy address (2)", async function () {
         const contract = await ETNBridge.deployed()
 
         const currentTestData = testData[10]
@@ -444,7 +469,7 @@ contract("ETNBridge", function (accounts) {
         const oldTotalTxCount = await contract.getTotalTxCount()
         const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
 
-        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, false)
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
 
         // Assert CrossChainTransfer event was emitted
         truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
@@ -458,17 +483,17 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
             expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
             expectedGetAddressFromLegacy: currentTestData.address,
-            expectedGetLegacyETNAddress: currentTestData.legacyAddress,
+            expectedGetLegacyETNAddress: [testData[9].legacyAddress, currentTestData.legacyAddress],
             expectedTXHistoryLength: 2,
-            expectedTXHistoryHashList: [testData[1].txHash, currentTestData.txHash],
+            expectedTXHistoryHashList: [testData[9].txHash, currentTestData.txHash],
             expectedGetTxAmount: currentTestData.amount,
             expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
-            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(testData[0].amount)),
-            expectedLastCrosschainLegacyTxHash: testData[0].txHash
+            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(currentTestData.amount)),
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
         })
     })
 
-    it("crosschainTransfer: valid inputs, same address, different tx hashes (2)", async function () {
+    it("crosschainTransfer: sc address mapped to a different legacy address (3)", async function () {
         const contract = await ETNBridge.deployed()
 
         const currentTestData = testData[11]
@@ -478,7 +503,7 @@ contract("ETNBridge", function (accounts) {
         const oldTotalTxCount = await contract.getTotalTxCount()
         const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
 
-        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, false)
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
 
         // Assert CrossChainTransfer event was emitted
         truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
@@ -492,17 +517,17 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
             expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
             expectedGetAddressFromLegacy: currentTestData.address,
-            expectedGetLegacyETNAddress: currentTestData.legacyAddress,
+            expectedGetLegacyETNAddress: [testData[9].legacyAddress, testData[10].legacyAddress, currentTestData.legacyAddress],
             expectedTXHistoryLength: 3,
-            expectedTXHistoryHashList: [testData[1].txHash, testData[10].txHash, currentTestData.txHash],
+            expectedTXHistoryHashList: [testData[9].txHash, testData[10].txHash, currentTestData.txHash],
             expectedGetTxAmount: currentTestData.amount,
             expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
-            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(testData[0].amount)),
-            expectedLastCrosschainLegacyTxHash: testData[0].txHash
+            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(currentTestData.amount)),
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
         })
     })
 
-    it("crosschainTransfer: valid inputs, same address, different tx hashes (3)", async function () {
+    it("crosschainTransfer: valid inputs, same address, different tx hashes (1)", async function () {
         const contract = await ETNBridge.deployed()
 
         const currentTestData = testData[12]
@@ -512,7 +537,7 @@ contract("ETNBridge", function (accounts) {
         const oldTotalTxCount = await contract.getTotalTxCount()
         const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
 
-        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, false)
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
 
         // Assert CrossChainTransfer event was emitted
         truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
@@ -526,13 +551,81 @@ contract("ETNBridge", function (accounts) {
             expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
             expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
             expectedGetAddressFromLegacy: currentTestData.address,
-            expectedGetLegacyETNAddress: currentTestData.legacyAddress,
-            expectedTXHistoryLength: 4,
-            expectedTXHistoryHashList: [testData[1].txHash, testData[10].txHash, testData[11].txHash, currentTestData.txHash],
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
+            expectedTXHistoryLength: 1,
+            expectedTXHistoryHashList: [currentTestData.txHash],
             expectedGetTxAmount: currentTestData.amount,
             expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
             expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(testData[0].amount)),
-            expectedLastCrosschainLegacyTxHash: testData[0].txHash
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
+        })
+    })
+
+    it("crosschainTransfer: valid inputs, same address, different tx hashes (2)", async function () {
+        const contract = await ETNBridge.deployed()
+
+        const currentTestData = testData[13]
+
+        const oldUserBalance = await web3.eth.getBalance(currentTestData.address)
+        const oldContractBalance = await web3.eth.getBalance(contract.address)
+        const oldTotalTxCount = await contract.getTotalTxCount()
+        const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
+
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
+
+        // Assert CrossChainTransfer event was emitted
+        truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
+            assert.equal(ev._from, currentTestData.legacyAddress, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._to, currentTestData.address, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._value, currentTestData.amount, "CrossChainTransfer Event: wrong amount")
+            return true
+        })
+
+        await assertCrosschainTransferResult(contract, currentTestData, {
+            expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
+            expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
+            expectedGetAddressFromLegacy: currentTestData.address,
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
+            expectedTXHistoryLength: 2,
+            expectedTXHistoryHashList: [testData[12].txHash, currentTestData.txHash],
+            expectedGetTxAmount: currentTestData.amount,
+            expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
+            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(testData[0].amount)),
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
+        })
+    })
+
+    it("crosschainTransfer: valid inputs, same address, different tx hashes (3)", async function () {
+        const contract = await ETNBridge.deployed()
+
+        const currentTestData = testData[14]
+
+        const oldUserBalance = await web3.eth.getBalance(currentTestData.address)
+        const oldContractBalance = await web3.eth.getBalance(contract.address)
+        const oldTotalTxCount = await contract.getTotalTxCount()
+        const oldTotalCrosschainAmount = await contract.getTotalCrosschainAmount()
+
+        const tx = await contract.crosschainTransfer(currentTestData.address, currentTestData.legacyAddress, currentTestData.amount, currentTestData.txHash, true)
+
+        // Assert CrossChainTransfer event was emitted
+        truffleAssert.eventEmitted(tx, 'CrossChainTransfer', (ev) => {
+            assert.equal(ev._from, currentTestData.legacyAddress, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._to, currentTestData.address, "CrossChainTransfer Event: wrong etn-sc address")
+            assert.equal(ev._value, currentTestData.amount, "CrossChainTransfer Event: wrong amount")
+            return true
+        })
+
+        await assertCrosschainTransferResult(contract, currentTestData, {
+            expectedEOABalance: (new BN(oldUserBalance)).add(new BN(currentTestData.amount)),
+            expectedContractBalance: (new BN(oldContractBalance)).sub(new BN(currentTestData.amount)),
+            expectedGetAddressFromLegacy: currentTestData.address,
+            expectedGetLegacyETNAddress: [currentTestData.legacyAddress],
+            expectedTXHistoryLength: 3,
+            expectedTXHistoryHashList: [testData[12].txHash, testData[13].txHash, currentTestData.txHash],
+            expectedGetTxAmount: currentTestData.amount,
+            expectedTotalTxCount: parseInt(oldTotalTxCount)+1,
+            expectedTotalCrosschainAmount: (new BN(oldTotalCrosschainAmount)).add(new BN(testData[0].amount)),
+            expectedLastCrosschainLegacyTxHash: currentTestData.txHash
         })
     })
 })
