@@ -63,7 +63,6 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
     function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant whenNotPaused {
         // Address verification
-        require(_address == address(_address), "Invalid address format");
         require(_address != address(0), "Invalid address");
         bytes memory tempLegacyETNBytes = bytes(_legacyETNAddress);
         require(tempLegacyETNBytes.length == 98, "Invalid legacy ETN address");
@@ -74,10 +73,6 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         bytes memory tempTXHashBytes = bytes(_txHash);
         require(tempTXHashBytes.length == 64, "Invalid transaction hash");
         require(txMap[_txHash] == 0, "Duplicate crosschain transaction");
-
-        // Store EOA and Contract old balance
-        uint256 addressOldBalance = _address.balance;
-        uint256 contractOldBalance = address(this).balance;
 
         // Check the LegacyAddress <-> Address map, a legacy ETN address should be mapped to the same SC address
         if(crosschainLegacyETNtoAddress[_legacyETNAddress] != address(0)) {
@@ -130,8 +125,6 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
         // Transfer ETN from contract to EOA
         _address.transfer(_amount);
-        require(_address.balance == addressOldBalance + _amount, "Invalid ETN transfer: recipient balance not updated");
-        require(address(this).balance == contractOldBalance - _amount, "Invalid ETN transfer: sender balance not updated");
 
         // Log event
         emit CrossChainTransfer(_legacyETNAddress, _legacyETNAddress, _address, _amount);
