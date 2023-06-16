@@ -65,6 +65,13 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant whenNotPaused {
         // Address verification
         require(_address != address(0), "Invalid address");
+
+        uint32 size;
+        assembly {
+            size := extcodesize(_address)
+        }
+        require(size == 0, "Cannot send to contract address");  // Prevent sending to contract addresses
+
         bytes memory tempLegacyETNBytes = bytes(_legacyETNAddress);
         require(tempLegacyETNBytes.length == 98, "Invalid legacy ETN address");
         // Amount verification
