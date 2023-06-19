@@ -12,23 +12,17 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 // Make ETNBridge inherit from the Ownable contract
 contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
 
-    struct LegacyETNAddress {
-        bytes32 keccak;
-        string addr;
-    }
-
     // Croschain mappings
-    mapping(string => address) internal crosschainLegacyETNtoAddress;               //legacy address to sc address
-    mapping(address => uint256) internal crosschainBalance;                         //sc address     to balance sent out
-    mapping(address => string[]) internal addressTxMap;                             //address to     to txhash array
-    mapping(string => uint256) internal txMap;                                      //tx hash        to tx amount
-    mapping(address => mapping(LegacyETNAddress => bool)) internal addressToLegacyETNToExistsMap; //sc address to legacy address (for const time lookup)
-
+    mapping(string => address) internal crosschainLegacyETNtoAddress;                   //legacy address to sc address
+    mapping(address => uint256) internal crosschainBalance;                             //sc address     to balance sent out
+    mapping(address => string[]) internal addressTxMap;                                 //address        to txhash array
+    mapping(string => uint256) internal txMap;                                          //tx hash        to tx amount
+    mapping(address => string[]) internal addressToLegacyETNAddressMap;                 // sc address    to legacy etn addresses
+    mapping(address => mapping(bytes32 => bool)) internal addressToLegacyETNToExistsMap;//const time lookup if legacy ETN address is already used
 
     // Counter for total crosschain amount and txs
     uint256 internal totalCrosschainAmount;
     uint internal totalCrosschainTxs;
-
     string internal lastCrosschainLegacyTxHash;
 
     // Event definitions
@@ -94,10 +88,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         bytes32 legacyAddressKeccak256 = keccak256(abi.encodePacked(_legacyETNAddress));
         if(addressToLegacyETNToExistsMap[_address][legacyAddressKeccak256] == false) {
             addressToLegacyETNToExistsMap[_address][legacyAddressKeccak256] = true;
-            LegacyETNAddress memory addrObj;
-            addrObj.keccak = legacyAddressKeccak256;
-            addrObj.addr = _legacyETNAddress;
-            crosschainAddressToLegacyETNExistsMap[_address].push(addrObj);
+            addressToLegacyETNAddressMap[_address].push(_legacyETNAddress);
         }
 
         // Compute total amount transacted
@@ -123,12 +114,8 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         emit CrossChainTransfer(_legacyETNAddress, _legacyETNAddress, _address, _amount);
     }
 
-    function getLegacyETNAddress(address _address) public view returns (LegacyETNAddress[] memory) {
-        LegacyETNAddress[] memory legacyAddresses = new LegacyETNAddress[](addressToLegacyETNToExistsMap[_address].length);
-        for (uint256 i = 0; i < addressToLegacyETNToExistsMap[_address].length; i++) {
-            legacyAddresses[i] = addressToLegacyETNToExistsMap[_address][i].addr;
-        }
-        return legacyAddresses;
+    function getLegacyETNAddress(address _address) public view returns (string[] memory) {
+        return addressToLegacyETNAddressMap[_address];
     }
 
     // Get new address from legacy etn address
