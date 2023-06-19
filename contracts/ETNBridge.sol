@@ -1,6 +1,6 @@
 // contracts/ETNBridge.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 // Import from the OpenZeppelin Contracts library
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -12,22 +12,17 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 // Make ETNBridge inherit from the Ownable contract
 contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
 
-    struct LegacyETNAddress {
-        bytes32 keccak;
-        string addr;
-    }
-
     // Croschain mappings
-    mapping(string => address) internal crosschainLegacyETNtoAddress;
-    mapping(address => LegacyETNAddress[]) internal crosschainAddressToLegacyETN;
-    mapping(address => uint256) internal crosschainBalance;
-    mapping(address => string[]) internal addressTxMap;
-    mapping(string => uint256) internal txMap;
+    mapping(string => address) internal crosschainLegacyETNtoAddress;                   //legacy address to sc address
+    mapping(address => uint256) internal crosschainBalance;                             //sc address     to balance sent out
+    mapping(address => string[]) internal addressTxMap;                                 //address        to txhash array
+    mapping(string => uint256) internal txMap;                                          //tx hash        to tx amount
+    mapping(address => string[]) internal addressToLegacyETNAddressMap;                 // sc address    to legacy etn addresses
+    mapping(address => mapping(bytes32 => bool)) internal addressToLegacyETNToExistsMap;//const time lookup if legacy ETN address is already used
 
     // Counter for total crosschain amount and txs
     uint256 internal totalCrosschainAmount;
     uint internal totalCrosschainTxs;
-
     string internal lastCrosschainLegacyTxHash;
 
     // Event definitions
@@ -36,7 +31,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
     // fallback() and receive() definition. This allows ETN to be sent to this contract address.
     fallback() external payable { require(msg.data.length == 0, ""); }
-    receive() external payable { emit DepositReceived(msg.sender, msg.value); }
+    receive() external payable onlyOwner { emit DepositReceived(msg.sender, msg.value); }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -63,8 +58,14 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
     function crosschainTransfer(address payable _address, string memory _legacyETNAddress, uint256 _amount, string memory _txHash, bool _isOracle) public onlyOwner nonReentrant whenNotPaused {
         // Address verification
-        require(_address == address(_address), "Invalid address format");
         require(_address != address(0), "Invalid address");
+
+        uint32 size;
+        assembly {
+            size := extcodesize(_address)
+        }
+        require(size == 0, "Cannot send to contract address");  // Prevent sending to contract addresses
+
         bytes memory tempLegacyETNBytes = bytes(_legacyETNAddress);
         require(tempLegacyETNBytes.length == 98, "Invalid legacy ETN address");
         // Amount verification
@@ -74,10 +75,6 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         bytes memory tempTXHashBytes = bytes(_txHash);
         require(tempTXHashBytes.length == 64, "Invalid transaction hash");
         require(txMap[_txHash] == 0, "Duplicate crosschain transaction");
-
-        // Store EOA and Contract old balance
-        uint256 addressOldBalance = _address.balance;
-        uint256 contractOldBalance = address(this).balance;
 
         // Check the LegacyAddress <-> Address map, a legacy ETN address should be mapped to the same SC address
         if(crosschainLegacyETNtoAddress[_legacyETNAddress] != address(0)) {
@@ -89,27 +86,9 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
         // Check the Address <-> LegacyAddress map, an Address can be mapped to multiple legacy addresses
         bytes32 legacyAddressKeccak256 = keccak256(abi.encodePacked(_legacyETNAddress));
-        uint arrayLength = crosschainAddressToLegacyETN[_address].length;
-        if(arrayLength == 0) {
-            LegacyETNAddress memory addrObj;
-            addrObj.keccak = legacyAddressKeccak256;
-            addrObj.addr = _legacyETNAddress;
-            crosschainAddressToLegacyETN[_address].push(addrObj);
-        } else {
-            bool found = false;
-            for(uint i = 0; i < arrayLength; i++) {
-                if(crosschainAddressToLegacyETN[_address][i].keccak == legacyAddressKeccak256) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if(!found) {
-                LegacyETNAddress memory addrObj;
-                addrObj.keccak = legacyAddressKeccak256;
-                addrObj.addr = _legacyETNAddress;
-                crosschainAddressToLegacyETN[_address].push(addrObj);
-            }
+        if(addressToLegacyETNToExistsMap[_address][legacyAddressKeccak256] == false) {
+            addressToLegacyETNToExistsMap[_address][legacyAddressKeccak256] = true;
+            addressToLegacyETNAddressMap[_address].push(_legacyETNAddress);
         }
 
         // Compute total amount transacted
@@ -130,16 +109,13 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
         // Transfer ETN from contract to EOA
         _address.transfer(_amount);
-        require(_address.balance == addressOldBalance + _amount, "Invalid ETN transfer: recipient balance not updated");
-        require(address(this).balance == contractOldBalance - _amount, "Invalid ETN transfer: sender balance not updated");
 
         // Log event
         emit CrossChainTransfer(_legacyETNAddress, _legacyETNAddress, _address, _amount);
     }
 
-    // Get legacy ETN address
-    function getLegacyETNAddress(address _address) public view returns (LegacyETNAddress[] memory) {
-        return crosschainAddressToLegacyETN[_address];
+    function getLegacyETNAddress(address _address) public view returns (string[] memory) {
+        return addressToLegacyETNAddressMap[_address];
     }
 
     // Get new address from legacy etn address
