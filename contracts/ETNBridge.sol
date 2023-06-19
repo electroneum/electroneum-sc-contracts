@@ -37,7 +37,7 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
 
     // fallback() and receive() definition. This allows ETN to be sent to this contract address.
     fallback() external payable { require(msg.data.length == 0, ""); }
-    receive() external payable { emit DepositReceived(msg.sender, msg.value); }
+    receive() external payable onlyOwner { emit DepositReceived(msg.sender, msg.value); }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
