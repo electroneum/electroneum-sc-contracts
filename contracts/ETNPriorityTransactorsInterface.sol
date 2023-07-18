@@ -10,5 +10,7 @@ interface ETNPriorityTransactorsInterface {
         string publicKey;
         string name;
     }
+
     function getTransactors() external view returns (TransactorMeta[] memory);
+    function getTransactorByKey(string memory _publicKey) external view returns (TransactorMeta memory);
 }

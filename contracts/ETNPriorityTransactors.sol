@@ -1,4 +1,4 @@
-// contracts/ETNBridge.sol
+// contracts/ETNPriorityTransactors.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
@@ -14,6 +14,7 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
 
     TransactorMeta[] internal transactorList;
     mapping(string => bool) internal publicKeyMap;
+    mapping(string => uint) internal keyToIndex;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -33,7 +34,9 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(bytes(_name).length > 0, "Name is empty");
         require(publicKeyMap[_publicKey] == false, "Transactor already exists");
-        require(_startHeight <= _endHeight, "Start height is greater than end height");
+        require(_startHeight > block.number, "Start height should be in the future");
+        require(_endHeight > block.number || _endHeight == 0, "End height should be in the future or zero");
+        require(_startHeight < _endHeight || _endHeight == 0, "Start height is greater than end height");
 
         TransactorMeta memory t;
         t.publicKey = _publicKey;
@@ -44,6 +47,7 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
 
         transactorList.push(t);
 
+        keyToIndex[_publicKey] = transactorList.length - 1;
         publicKeyMap[_publicKey] = true;
     }
 
@@ -52,14 +56,14 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
 
-        uint index;
-        bool found;
-        (index, found) = getTransactorIndex(_publicKey);
-        require(found, "Transactor not found in the list");
-
-        transactorList[index] = transactorList[transactorList.length - 1];
+        uint index = keyToIndex[_publicKey];
+        
+        TransactorMeta memory last = transactorList[transactorList.length - 1];
+        keyToIndex[last.publicKey] = index;
+        transactorList[index] = last;
         transactorList.pop();
 
+        delete(keyToIndex[_publicKey]);
         delete(publicKeyMap[_publicKey]);
     }
 
@@ -68,10 +72,7 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
         require(_endHeight > block.number, "EndHeight should be in the future");
 
-        uint index;
-        bool found;
-        (index, found) = getTransactorIndex(_publicKey);
-        require(found, "Transactor not found in the list");
+        uint index = keyToIndex[_publicKey];
         require(transactorList[index].startHeight <= _endHeight, "Start height is greater than end height");
 
         transactorList[index].endHeight = _endHeight;
@@ -82,24 +83,17 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
 
-        uint index;
-        bool found;
-        (index, found) = getTransactorIndex(_publicKey);
-        require(found, "Transactor not found in the list");
-
-        transactorList[index].isGasPriceWaiver = _isWaiver;
+        transactorList[keyToIndex[_publicKey]].isGasPriceWaiver = _isWaiver;
     }
 
     function getTransactors() public view returns (TransactorMeta[] memory) {
         return transactorList;
     }
 
-    function getTransactorIndex(string memory _publicKey) private view returns (uint, bool) {
-        for(uint i = 0; i < transactorList.length; i++) {
-            if(keccak256(abi.encodePacked(_publicKey)) == keccak256(abi.encodePacked(transactorList[i].publicKey))) {
-                return (i, true);
-            }
-        }
-        return (0, false);  // Return false when not found
+    function getTransactorByKey(string memory _publicKey) public view returns (TransactorMeta memory) {
+        require(bytes(_publicKey).length == 130, "Invalid public key");
+        require(publicKeyMap[_publicKey] == true, "Transactor not found");
+
+        return transactorList[keyToIndex[_publicKey]];
     }
 }
