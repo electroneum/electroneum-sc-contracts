@@ -33,6 +33,7 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(bytes(_name).length > 0, "Name is empty");
         require(publicKeyMap[_publicKey] == false, "Transactor already exists");
+        require(_startHeight <= _endHeight, "Start height is greater than end height");
 
         TransactorMeta memory t;
         t.publicKey = _publicKey;
@@ -71,6 +72,7 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         bool found;
         (index, found) = getTransactorIndex(_publicKey);
         require(found, "Transactor not found in the list");
+        require(transactorList[index].startHeight <= _endHeight, "Start height is greater than end height");
 
         transactorList[index].endHeight = _endHeight;
     }
