@@ -46,11 +46,17 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         publicKeyMap[_publicKey] = true;
     }
 
+    // Consensus is ok with this because a snapshot of the per-height version of the contract is stored in node levelDB
     function removeTransactor(string memory _publicKey) public onlyOwner nonReentrant {
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
 
-        transactorList[getTransactorIndex(_publicKey)] = transactorList[transactorList.length - 1];
+        uint index;
+        bool found;
+        (index, found) = getTransactorIndex(_publicKey);
+        require(found, "Transactor not found in the list");
+
+        transactorList[index] = transactorList[transactorList.length - 1];
         transactorList.pop();
 
         delete(publicKeyMap[_publicKey]);
@@ -61,28 +67,37 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
         require(_endHeight > block.number, "EndHeight should be in the future");
 
-        transactorList[getTransactorIndex(_publicKey)].endHeight = _endHeight;
+        uint index;
+        bool found;
+        (index, found) = getTransactorIndex(_publicKey);
+        require(found, "Transactor not found in the list");
+
+        transactorList[index].endHeight = _endHeight;
     }
+
 
     function setIsWaiver(string memory _publicKey, bool _isWaiver) public onlyOwner nonReentrant {
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
 
-        transactorList[getTransactorIndex(_publicKey)].isGasPriceWaiver = _isWaiver;
+        uint index;
+        bool found;
+        (index, found) = getTransactorIndex(_publicKey);
+        require(found, "Transactor not found in the list");
+
+        transactorList[index].isGasPriceWaiver = _isWaiver;
     }
 
     function getTransactors() public view returns (TransactorMeta[] memory) {
         return transactorList;
     }
 
-    function getTransactorIndex(string memory _publicKey) private view returns (uint) {
-        uint index;
+    function getTransactorIndex(string memory _publicKey) private view returns (uint, bool) {
         for(uint i = 0; i < transactorList.length; i++) {
             if(keccak256(abi.encodePacked(_publicKey)) == keccak256(abi.encodePacked(transactorList[i].publicKey))) {
-                index = i;
-                break;
+                return (i, true);
             }
         }
-        return index;
+        return (0, false);  // Return false when not found
     }
 }
