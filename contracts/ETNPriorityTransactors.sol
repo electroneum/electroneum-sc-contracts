@@ -31,12 +31,12 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
     }
 
     function addTransactor(string memory _publicKey, bool _isWaiver, string memory _name, uint64 _startHeight, uint64 _endHeight) public onlyOwner nonReentrant {
-        require(bytes(_publicKey).length == 130, "Invalid public key");
+        require(bytes(_publicKey).length == 130, "Invalid public key");  // 130 character hex string is not 65 bytes in solidity as it converts 1char:1byte
         require(bytes(_name).length > 0, "Name is empty");
         require(publicKeyMap[_publicKey] == false, "Transactor already exists");
         require(_startHeight > block.number, "Start height should be in the future");
         require(_endHeight > block.number || _endHeight == 0, "End height should be in the future or zero");
-        require(_startHeight < _endHeight || _endHeight == 0, "Start height is greater than end height");
+        require(_startHeight <= _endHeight || _endHeight == 0, "Start height is greater than end height");
 
         TransactorMeta memory t;
         t.publicKey = _publicKey;
@@ -56,15 +56,14 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
 
-        uint index = keyToIndex[_publicKey];
-        
-        TransactorMeta memory last = transactorList[transactorList.length - 1];
-        keyToIndex[last.publicKey] = index;
-        transactorList[index] = last;
-        transactorList.pop();
+        uint index = keyToIndex[_publicKey];                                    // index of public key for transactor list that we want to remove
+        TransactorMeta memory last = transactorList[transactorList.length - 1]; // get memory of last transactor in the transactor list
+        keyToIndex[last.publicKey] = index;                                     // change the index of the public key found in the last slot to the index of the public key we want to remove
+        transactorList[index] = last;                                           // put the last transactor in the list in place of the transactor that we're removing
+        transactorList.pop();                                                   // pop the last transactor in the list because it's now in place of the transactor that's been removed
 
-        delete(keyToIndex[_publicKey]);
-        delete(publicKeyMap[_publicKey]);
+        delete(keyToIndex[_publicKey]);                                         // doesn't actually remove the key but sets the default value
+        delete(publicKeyMap[_publicKey]);                                       // doesn't actually remove the key but sets the default value
     }
 
     function setEndHeight(string memory _publicKey, uint64 _endHeight) public onlyOwner nonReentrant{
