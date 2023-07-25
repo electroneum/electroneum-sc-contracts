@@ -30,28 +30,20 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         __ReentrancyGuard_init();
     }
 
-    function addTransactor(string memory _publicKey, bool _isWaiver, string memory _name, uint64 _startHeight, uint64 _endHeight) public onlyOwner nonReentrant {
+    function addTransactor(string memory _publicKey, bool _isWaiver, string memory _name) public onlyOwner nonReentrant {
         require(bytes(_publicKey).length == 130, "Invalid public key");  // 130 character hex string is not 65 bytes in solidity as it converts 1char:1byte
         require(bytes(_name).length > 0, "Name is empty");
         require(publicKeyMap[_publicKey] == false, "Transactor already exists");
-        require(_startHeight > block.number, "Start height should be in the future");
-        require(_endHeight > block.number || _endHeight == 0, "End height should be in the future or zero");
-        require(_startHeight <= _endHeight || _endHeight == 0, "Start height is greater than end height");
 
         TransactorMeta memory t;
         t.publicKey = _publicKey;
         t.name = _name;
         t.isGasPriceWaiver = _isWaiver;
-        t.startHeight = _startHeight;
-        t.endHeight = _endHeight;
-
         transactorList.push(t);
-
         keyToIndex[_publicKey] = transactorList.length - 1;
         publicKeyMap[_publicKey] = true;
     }
 
-    // Consensus is ok with this because a snapshot of the per-height version of the contract is stored in node levelDB
     function removeTransactor(string memory _publicKey) public onlyOwner nonReentrant {
         require(bytes(_publicKey).length == 130, "Invalid public key");
         require(publicKeyMap[_publicKey] == true, "Transactor not found");
@@ -65,18 +57,6 @@ contract ETNPriorityTransactors is ETNPriorityTransactorsInterface, Initializabl
         delete(keyToIndex[_publicKey]);                                         // doesn't actually remove the key but sets the default value
         delete(publicKeyMap[_publicKey]);                                       // doesn't actually remove the key but sets the default value
     }
-
-    function setEndHeight(string memory _publicKey, uint64 _endHeight) public onlyOwner nonReentrant{
-        require(bytes(_publicKey).length == 130, "Invalid public key");
-        require(publicKeyMap[_publicKey] == true, "Transactor not found");
-        require(_endHeight > block.number, "EndHeight should be in the future");
-
-        uint index = keyToIndex[_publicKey];
-        require(transactorList[index].startHeight <= _endHeight, "Start height is greater than end height");
-
-        transactorList[index].endHeight = _endHeight;
-    }
-
 
     function setIsWaiver(string memory _publicKey, bool _isWaiver) public onlyOwner nonReentrant {
         require(bytes(_publicKey).length == 130, "Invalid public key");
