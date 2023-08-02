@@ -41,11 +41,11 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
-     development: {
+    development: {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 7545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none)
-     },
+    },
     //
     // An additional network, but with some advanced options…
     // advanced: {
@@ -76,11 +76,17 @@ module.exports = {
     // }
     electroneum: {
       provider: () => new HDWalletProvider(mnemonic, "http://127.0.0.1:8545", MetaMaskAccountIndex),
-      host: "localhost", 
+      host: "localhost",
       port: 8545,
       network_id: 5201420,
-      production: true 
+      production: true
     },
+    privatenet: {
+      host: "172.16.239.15",
+      port: 8545,
+      network_id: 1337,
+      production: true
+    }
   },
 
   // Set default mocha options here, use special reporters, etc.
