@@ -20,7 +20,15 @@
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+let mnemonic;
+fs.access(".secret", fs.constants.F_OK, (err) => {
+  if (!err) {
+    mnemonic = fs.readFileSync(".secret").toString().trim();
+  }
+});
+
+const devMnemonic = "recipe flock effort test evil card identify grab shift venture movie tonight";
+
 const MetaMaskAccountIndex = 0;
 
 module.exports = {
@@ -82,10 +90,12 @@ module.exports = {
       production: true
     },
     privatenet: {
+      provider: () => new HDWalletProvider(devMnemonic, "http://172.16.239.15:8545", MetaMaskAccountIndex),
       host: "172.16.239.15",
       port: 8545,
       network_id: 1337,
-      production: true
+      production: true,
+      skipDryRun: true
     }
   },
 
@@ -97,7 +107,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.8.20",      // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.13",      // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
