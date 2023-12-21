@@ -1,6 +1,6 @@
 // contracts/ETNBridge.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity 0.8.22;
 
 // Import from the OpenZeppelin Contracts library
 import "@openzeppelin/contracts-upgradeable@4.9.3/proxy/utils/Initializable.sol";
