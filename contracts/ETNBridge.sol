@@ -94,6 +94,9 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
         // Compute total amount transacted
         totalCrosschainAmount += _amount;
 
+        // Compute total amount transacted per address
+        crosschainBalance[_address] = crosschainBalance[_address] + _amount;
+
         // Count crosschain tx
         totalCrosschainTxs += 1;
 
@@ -141,6 +144,11 @@ contract ETNBridge is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentr
     // Get total amount of ETN sent to this bridge contract
     function getTotalCrosschainAmount() public view returns (uint256) {
         return totalCrosschainAmount;
+    }
+
+    // Get total amount of ETN migrated per address
+    function getAddressCosschainAmount() public view return (uint256) {
+        return crosschainBalance[_address];
     }
 
     function getLastCrosschainLegacyTxHash() public view returns (string memory) {
