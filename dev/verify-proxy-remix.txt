@@ -1,0 +1,8 @@
+1. Create a 'proxy.sol' in remix that has only this:
+    
+    import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+2. Navigate to '.deps/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'
+3. Use Remix to flatten the ERC1967Proxy.sol file
+4. Get Compiler version & options from: https://github.com/ethereum/remix-project/blob/master/libs/remix-core-plugin/src/lib/constants/uups.ts#L6
+5. Verify it on blockscout

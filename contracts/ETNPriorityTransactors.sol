@@ -1,12 +1,12 @@
 // contracts/ETNPriorityTransactors.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity 0.8.23;
 
 // Import from the OpenZeppelin Contracts library
-import "@openzeppelin/contracts-upgradeable@4.9.3/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable@4.9.3/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable@4.9.3/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable@4.9.3/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./ETNPriorityTransactorsInterface.sol";
 
 // Make ETNPriorityTransactors inherit from the Ownable contract
