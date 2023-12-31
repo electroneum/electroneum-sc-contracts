@@ -3,12 +3,12 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/contracts-upgradeable": "4.9.3",
-    "@openzeppelin/hardhat-upgrades": "^3.0.1",
+    "@openzeppelin/hardhat-upgrades": "2.5.1",
     "ethers": "^6.9.1",
     "hardhat": "^2.19.3"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.0",
+    "@openzeppelin/contracts": "4.9.3",
     "@truffle/hdwallet-provider": "^2.0.10",
     "bn.js": "^5.2.1"
   }
