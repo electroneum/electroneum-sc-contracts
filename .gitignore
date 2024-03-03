@@ -14,8 +14,6 @@ build
 cache
 artifacts
 
-.openzeppelin
-
 node_modules
 .env
 
