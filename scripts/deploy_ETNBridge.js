@@ -6,6 +6,7 @@
 // global scope, and execute the script.
 const { toBigInt } = require("ethers");
 const hre = require("hardhat");
+const { vars } = require("hardhat/config");
 
 /*
  * deploy_ETNBridge.js
@@ -27,7 +28,7 @@ async function main() {
   const [bridgeDeployer, _, validatorSigner] = await hre.ethers.getSigners();
   
   // 1) Check if ETNBridge is already deployed
-  const isBridgeContractDeployed = (await bridgeDeployer.provider.getCode("0xe5da12b1bcf74ff0aec20671beabc466f8b54727")) != '0x';
+  const isBridgeContractDeployed = (await bridgeDeployer.provider.getCode(vars.get("BRIDGE_CONTRACT_ADDRESS"))) != '0x';
   console.log("Check ETNBridge deployed: " + isBridgeContractDeployed);
 
   // Return if ERC1967Proxy is deployed

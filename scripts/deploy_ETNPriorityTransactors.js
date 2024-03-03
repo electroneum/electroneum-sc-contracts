@@ -6,9 +6,10 @@
 // global scope, and execute the script.
 const { toBigInt } = require("ethers");
 const hre = require("hardhat");
+const { vars } = require("hardhat/config");
 
 const priorityTransactors = [
-    { priorityPubKey: "043816468c0cd1ba9f8281cfb42c311b96f5aae539e51194eea6ee48fd2f971250a1ecb9d971d61e3faa65b54dbf5acc752457f9bad8877bff3a9fb3ce389346e8", isWaiver: true, name: "ETN Oracle" },
+    { priorityPubKey: "04e69d3085f42801bf135ac6f2f8b21a9157d775344f9c29e42602ebe13d7a60dc989f5dc3d2888cf457acda9e2c90e2542def6980c9250c8ac0416879f718f169", isWaiver: true, name: "ETN Oracle" },
 ]
 
 /*
@@ -27,7 +28,7 @@ async function main() {
   const [_, priorityDeployer, validatorSigner] = await hre.ethers.getSigners();
   
   // 1) Check if ETNPriorityTransactors is already deployed
-  const isPriorityContractDeployed = (await priorityDeployer.provider.getCode("0x1ef0959497375a7539e487749584aeb4947b7a90")) != '0x';
+  const isPriorityContractDeployed = (await priorityDeployer.provider.getCode(vars.get("PRIORITY_CONTRACT_ADDRESS"))) != '0x';
   console.log("Check ETNPriorityTransactors deployed: " + isPriorityContractDeployed);
 
   // Return if ERC1967Proxy is deployed
