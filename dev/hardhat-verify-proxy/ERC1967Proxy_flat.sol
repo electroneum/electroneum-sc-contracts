@@ -151,7 +151,7 @@ library StorageSlot {
     }
 }
 
-// File: mainnet/0xd1873c48Bd902673F7ca4a24D3c0a0B7fD263A7F/@openzeppelin/contracts/utils/Address.sol
+// File: @openzeppelin/contracts/utils/Address.sol
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/Address.sol)
 
@@ -330,7 +330,7 @@ library Address {
     }
 }
 
-// File: mainnet/0xd1873c48Bd902673F7ca4a24D3c0a0B7fD263A7F/@openzeppelin/contracts/proxy/beacon/IBeacon.sol
+// File: @openzeppelin/contracts/proxy/beacon/IBeacon.sol
 
 // OpenZeppelin Contracts (last updated v5.0.0) (proxy/beacon/IBeacon.sol)
 
@@ -348,7 +348,7 @@ interface IBeacon {
     function implementation() external view returns (address);
 }
 
-// File: mainnet/0xd1873c48Bd902673F7ca4a24D3c0a0B7fD263A7F/@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol
+// File: @openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol
 
 // OpenZeppelin Contracts (last updated v5.0.0) (proxy/ERC1967/ERC1967Utils.sol)
 
@@ -553,7 +553,7 @@ library ERC1967Utils {
     }
 }
 
-// File: mainnet/0xd1873c48Bd902673F7ca4a24D3c0a0B7fD263A7F/@openzeppelin/contracts/proxy/Proxy.sol
+// File: @openzeppelin/contracts/proxy/Proxy.sol
 
 // OpenZeppelin Contracts (last updated v5.0.0) (proxy/Proxy.sol)
 
@@ -631,7 +631,7 @@ abstract contract Proxy {
     }
 }
 
-// File: mainnet/0xd1873c48Bd902673F7ca4a24D3c0a0B7fD263A7F/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol
+// File: @openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol
 
 // OpenZeppelin Contracts (last updated v5.0.0) (proxy/ERC1967/ERC1967Proxy.sol)
 
