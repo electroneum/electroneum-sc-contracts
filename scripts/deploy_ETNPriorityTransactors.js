@@ -9,7 +9,9 @@ const hre = require("hardhat");
 const { vars } = require("hardhat/config");
 
 const priorityTransactors = [
-    { priorityPubKey: "04e69d3085f42801bf135ac6f2f8b21a9157d775344f9c29e42602ebe13d7a60dc989f5dc3d2888cf457acda9e2c90e2542def6980c9250c8ac0416879f718f169", isWaiver: true, name: "ETN Oracle" },
+    {priorityPubKey: "04a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd5b8dec5235a0fa8722476c7709c02559e3aa73aa03918ba2d492eea75abea235", isWaiver: true, name: "ETN Oracle", privateKey: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+    {priorityPubKey: "0409abc94f95636930c9ba88c6ef633d06d3573db8331707d681b34372915d157a5c9c3f066cfa315e7ea504d1ff92330f8eff5a7ebe7a686fb5ca6eead949258b", isWaiver: true, name: "Gas Price Waiver Key", privateKey: "8236f08425125828960d38366af36cd229e87cda6683558a1ef868e26c1b8fd3" },
+    {priorityPubKey: "0461413585811d3ab1a7c366b6153834c78eea8c89ae57e42065e6ee138077437d05ab2591f42ecf5e9b54046739c38be1695f12e0d06eb8efd037ae09bb69e6e9", isWaiver: false, name: "Non Gas Price Waiver Key", privateKey: "5d96d2db21f10d1910e84579f70c7c090f5cc89c644675377409e58159d96910"}
 ]
 
 /*
