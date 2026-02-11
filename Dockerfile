@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+RUN apk add --no-cache curl bash
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY . .
+
+# Pre-populate hardhat vars with dummy vars so hardhat.config.js can load at compile time
+RUN npx hardhat vars set BRIDGE_PRIVATE_KEY 0000000000000000000000000000000000000000000000000000000000000001 && \
+    npx hardhat vars set PRIORITY_PRIVATE_KEY 0000000000000000000000000000000000000000000000000000000000000002 && \
+    npx hardhat vars set FUNDER_PRIVATE_KEY 0000000000000000000000000000000000000000000000000000000000000003 && \
+    npx hardhat vars set BRIDGE_CONTRACT_ADDRESS 0x0000000000000000000000000000000000000000 && \
+    npx hardhat vars set PRIORITY_CONTRACT_ADDRESS 0x0000000000000000000000000000000000000000
+
+RUN npx hardhat compile
+
+ENTRYPOINT ["bash"]
