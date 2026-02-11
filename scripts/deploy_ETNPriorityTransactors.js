@@ -25,7 +25,7 @@ const priorityTransactors = [
 */
 
 async function main() {
-  const [_, priorityDeployer, validatorSigner] = await hre.ethers.getSigners();
+  const [_, priorityDeployer, funderSigner] = await hre.ethers.getSigners();
   
   // 1) Check if ETNPriorityTransactors is already deployed
   const isPriorityContractDeployed = (await priorityDeployer.provider.getCode(vars.get("PRIORITY_CONTRACT_ADDRESS"))) != '0x';
@@ -36,8 +36,8 @@ async function main() {
     return;
   }
 
-  // 2) Send 5 ETN from Validator to Priority owner
-  const priorityOwnerTx = await validatorSigner.sendTransaction({
+  // 2) Send 5 ETN from Funder to Priority owner
+  const priorityOwnerTx = await funderSigner.sendTransaction({
     to: priorityDeployer.getAddress(),
     value: hre.ethers.parseUnits("5", "ether")
   })

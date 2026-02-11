@@ -22,17 +22,17 @@ module.exports = {
     etn_sc_privatenet: {
       url: "http://localhost:8545",
       chainId: 1337,
-      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("VALIDATOR_PRIVATE_KEY")]
+      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("FUNDER_PRIVATE_KEY")]
     },
     etn_sc_testnet: {
       url: "http://localhost:8545",
       chainId: 5201420,
-      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("VALIDATOR_PRIVATE_KEY")]
+      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("FUNDER_PRIVATE_KEY")]
     },
     etn_sc: {
       url: "http://localhost:8545",
       chainId: 52014,
-      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("VALIDATOR_PRIVATE_KEY")]
+      accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("FUNDER_PRIVATE_KEY")]
     },
     hardhat: {
       accounts: [ 
@@ -40,8 +40,8 @@ module.exports = {
         { balance: "17951808565760000000000000000", privateKey: vars.get("BRIDGE_PRIVATE_KEY") }, // 100000 ETN
         // Priority Deployer
         { balance: "0", privateKey: vars.get("PRIORITY_PRIVATE_KEY") },
-        // Validator
-        { balance: "10000000000000000000", privateKey: vars.get("VALIDATOR_PRIVATE_KEY") }, // 10 ETN
+        // Funder
+        { balance: "10000000000000000000", privateKey: vars.get("FUNDER_PRIVATE_KEY") }, // 10 ETN
       ],
       gas: "auto",
     }
