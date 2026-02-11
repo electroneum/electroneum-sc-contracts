@@ -37,7 +37,7 @@ module.exports = {
     hardhat: {
       accounts: [ 
         // Bridge Deployer
-        { balance: "17951808565760000000000000000", privateKey: vars.get("BRIDGE_PRIVATE_KEY") }, // 100000 ETN
+        { balance: "17951808565760000000000000000", privateKey: vars.get("BRIDGE_PRIVATE_KEY") }, //~17.95 billion ETN
         // Priority Deployer
         { balance: "0", privateKey: vars.get("PRIORITY_PRIVATE_KEY") },
         // Funder
