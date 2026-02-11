@@ -1,0 +1,11 @@
+node_modules
+.git
+.idea
+artifacts
+cache
+coverage
+coverage.json
+typechain
+typechain-types
+.env
+.secret
