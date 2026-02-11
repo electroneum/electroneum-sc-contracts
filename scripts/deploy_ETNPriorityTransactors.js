@@ -53,10 +53,11 @@ async function main() {
   console.log("ETNPriorityTransactors Proxy deployed to:", await ETNPriorityTransactors.getAddress());
 
   // 4) Add priority transactors
-  priorityTransactors.forEach(async t => {
-    await ETNPriorityTransactors.addTransactor(t.priorityPubKey, t.isWaiver, t.name);
-    console.log("Priority transactor added: " + t.name)
-  });
+  for (const t of priorityTransactors) {
+    const tx = await ETNPriorityTransactors.addTransactor(t.priorityPubKey, t.isWaiver, t.name);
+    await tx.wait(1);
+    console.log("Priority transactor added: " + t.name);
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
