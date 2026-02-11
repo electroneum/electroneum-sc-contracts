@@ -20,7 +20,7 @@ module.exports = {
   },
   networks: {
     etn_sc_privatenet: {
-      url: "http://localhost:8545",
+      url: process.env.RPC_URL || "http://localhost:8545",
       chainId: 1337,
       accounts: [vars.get("BRIDGE_PRIVATE_KEY"), vars.get("PRIORITY_PRIVATE_KEY"), vars.get("FUNDER_PRIVATE_KEY")]
     },
