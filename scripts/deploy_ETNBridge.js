@@ -20,12 +20,12 @@ const { vars } = require("hardhat/config");
  * 4) Get current balance of the bridge contract owner again (after deployment)
  * 5) Calculate the deployment cost by subtracting balance #4 from #2
  * 6) Estimate gas cost & fees based on current network conditions
- * 7) Reimburse the deployment costs + extra for subsequent fee from one of the validators to ETNBridge contract owner. This assures the ETNBridge contract ends up with the correct balance (#2)
+ * 7) Reimburse the deployment costs + extra for subsequent fee from the funder account to ETNBridge contract owner. This assures the ETNBridge contract ends up with the correct balance (#2)
  * 8) Send the circulating supply balance (#2) from ETNBridge account owner to the ETNBridge contract
 */
 
 async function main() {
-  const [bridgeDeployer, _, validatorSigner] = await hre.ethers.getSigners();
+  const [bridgeDeployer, _, funderSigner] = await hre.ethers.getSigners();
   
   // 1) Check if ETNBridge is already deployed
   const isBridgeContractDeployed = (await bridgeDeployer.provider.getCode(vars.get("BRIDGE_CONTRACT_ADDRESS"))) != '0x';
@@ -60,12 +60,12 @@ async function main() {
   const estimatedGas = await bridgeDeployer.provider.estimateGas(circulatingSupplyTx);
   const fee = await bridgeDeployer.provider.getFeeData();
 
-  // 7) Send ETN from Validator to Bridge owner to cover tx fee + deployment cost
-  const validatorTx = await validatorSigner.sendTransaction({
+  // 7) Send ETN from Funder to Bridge owner to cover tx fee + deployment cost
+  const funderTx = await funderSigner.sendTransaction({
     to: bridgeDeployer.getAddress(),
     value: deploymentCost + (estimatedGas * fee.maxFeePerGas)
   });
-  await validatorTx.wait(1);
+  await funderTx.wait(1);
 
   // Update tx value with the actual legacy circulating supply amount
   circulatingSupplyTx.value = legacyCirculatingSupply;
